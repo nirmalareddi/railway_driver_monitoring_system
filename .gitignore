@@ -1,0 +1,21 @@
+# Python
+venv/
+.venv/
+__pycache__/
+*.pyc
+
+# Generated outputs
+outputs/
+videos/
+
+# YOLO model
+*.pt
+
+# Environment
+.env
+
+# VS Code
+.vscode/
+
+# Logs
+*.log

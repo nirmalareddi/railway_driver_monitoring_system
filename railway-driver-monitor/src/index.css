@@ -1,0 +1,217 @@
+/* Design Tokens & Theme Setup */
+:root {
+  --bg-primary: #02040A;
+  --bg-secondary: #0B0F19;
+  --accent-violet: #6D4AFF;
+  --accent-blue: #00E5FF;
+  --color-success: #00E676;
+  --color-warning: #FFB300;
+  --color-danger: #FF3B6B;
+  
+  --card-glass: rgba(13, 20, 38, 0.45);
+  --border-glass: rgba(109, 74, 255, 0.15);
+  --border-glass-hover: rgba(109, 74, 255, 0.35);
+  
+  --glow-violet: 0 0 15px rgba(109, 74, 255, 0.35);
+  --glow-blue: 0 0 15px rgba(0, 229, 255, 0.35);
+  --glow-success: 0 0 15px rgba(0, 230, 118, 0.35);
+  --glow-danger: 0 0 15px rgba(255, 59, 107, 0.35);
+  --glow-warning: 0 0 15px rgba(255, 179, 0, 0.35);
+
+  --font-title: 'Orbitron', sans-serif;
+  --font-content: 'Inter', sans-serif;
+
+  --sidebar-width: 260px;
+  --sidebar-collapsed-width: 80px;
+  --topbar-height: 70px;
+}
+
+/* Global Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--bg-primary);
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(109, 74, 255, 0.12) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(0, 229, 255, 0.08) 0px, transparent 50%),
+    radial-gradient(at 50% 50%, rgba(13, 20, 38, 0.5) 0px, transparent 80%);
+  background-attachment: fixed;
+  color: #E2E8F0;
+  font-family: var(--font-content);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-title);
+  letter-spacing: 0.05em;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(109, 74, 255, 0.3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-violet);
+  box-shadow: var(--glow-violet);
+}
+
+/* Glassmorphism Utilities */
+.glass-card {
+  background: var(--card-glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-glass);
+  border-radius: 12px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  position: relative;
+  overflow: hidden;
+}
+
+.glass-card:hover {
+  border-color: var(--border-glass-hover);
+  box-shadow: 0 8px 32px 0 rgba(109, 74, 255, 0.15);
+}
+
+.glass-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.03),
+    transparent
+  );
+  transition: 0.5s;
+  pointer-events: none;
+}
+
+.glass-card:hover::before {
+  left: 150%;
+}
+
+/* Futuristic HUD elements */
+.neon-glow-violet {
+  box-shadow: var(--glow-violet);
+  border-color: var(--accent-violet);
+}
+
+.neon-glow-blue {
+  box-shadow: var(--glow-blue);
+  border-color: var(--accent-blue);
+}
+
+.neon-text-violet {
+  color: var(--accent-violet);
+  text-shadow: 0 0 8px rgba(109, 74, 255, 0.5);
+}
+
+.neon-text-blue {
+  color: var(--accent-blue);
+  text-shadow: 0 0 8px rgba(0, 229, 255, 0.5);
+}
+
+.neon-text-danger {
+  color: var(--color-danger);
+  text-shadow: 0 0 8px rgba(255, 59, 107, 0.5);
+}
+
+/* Animated scanning lines */
+.scanning-line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent-blue), transparent);
+  animation: scan 3s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes scan {
+  0% {
+    top: 0%;
+  }
+  50% {
+    top: 100%;
+  }
+  100% {
+    top: 0%;
+  }
+}
+
+/* Shimmer load effect */
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.03) 25%,
+    rgba(255, 255, 255, 0.08) 50%,
+    rgba(255, 255, 255, 0.03) 75%
+  );
+  background-size: 200% 100%;
+  animation: loading-shimmer 1.5s infinite;
+}
+
+@keyframes loading-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Pulsing DOT */
+.pulse-dot {
+  width: 8px;
+  height: 8px;
+  background-color: var(--color-success);
+  border-radius: 50%;
+  box-shadow: var(--glow-success);
+  animation: pulse 1.8s infinite alternate;
+}
+
+.pulse-dot.danger {
+  background-color: var(--color-danger);
+  box-shadow: var(--glow-danger);
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(0.9);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+}
+
+/* Interactive list hover styles */
+.interactive-item {
+  transition: all 0.2s ease;
+}
+.interactive-item:hover {
+  background: rgba(109, 74, 255, 0.08) !important;
+  transform: translateX(4px);
+}
