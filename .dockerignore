@@ -1,0 +1,14 @@
+venv/
+.venv/
+__pycache__/
+
+outputs/
+videos/
+
+.git/
+
+railway-driver-monitor/node_modules/
+railway-driver-monitor/dist/
+
+*.pyc
+*.log
