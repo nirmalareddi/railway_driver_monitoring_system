@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const baseURL =
   import.meta.env.VITE_API_BASE_URL ||
-  'http://localhost:8000';
+  'https://railway-driver-monitor-api-612246961509.us-central1.run.app';
 
 const axiosClient = axios.create({
   baseURL,

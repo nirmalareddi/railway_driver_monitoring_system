@@ -104,11 +104,21 @@ def analyze_video():
             text=True
         )
 
-        if result.returncode != 0:
+        print("STDOUT:")
+        print(result.stdout)
 
+        print("STDERR:")
+        print(result.stderr)
+
+        print("RETURN CODE:")
+        print(result.returncode)
+
+        if result.returncode != 0:
             return {
                 "status": "failed",
-                "error": result.stderr
+                "return_code": result.returncode,
+                "stdout": result.stdout,
+                "stderr": result.stderr[-5000:]
             }
 
         return {

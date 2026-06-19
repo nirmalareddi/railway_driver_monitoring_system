@@ -49,9 +49,8 @@ export const analysisService = {
 
     return {
       videoId: 'latest',
-      videoUrl: 'http://localhost:8000/video',
-
-      // Replace these later with real values from backend
+      videoUrl:
+        'https://railway-driver-monitor-api-612246961509.us-central1.run.app/video',
       duration: '01m 53s',
       durationSeconds: 113,
       totalFrames: 3386,
@@ -61,17 +60,10 @@ export const analysisService = {
       totalIncidents: report.total_events || 0,
 
       incidentsSummary: {
-        drowsiness:
-          report.event_summary?.drowsiness || 0,
-
-        attentionLoss:
-          report.event_summary?.attention_loss || 0,
-
-        mobileUsage:
-          report.event_summary?.mobile_usage || 0,
-
-        faceNotVisible:
-          report.event_summary?.face_not_visible || 0
+        drowsiness: report.event_summary?.drowsiness || 0,
+        attentionLoss: report.event_summary?.attention_loss || 0,
+        mobileUsage: report.event_summary?.mobile_usage || 0,
+        faceNotVisible: report.event_summary?.face_not_visible || 0
       }
     };
   },

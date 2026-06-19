@@ -175,7 +175,7 @@ export const VideoPlayer = ({ videoUrl, timeline = [], activeIncident, onTimeUpd
 
 <video
   ref={videoRef}
-  src="http://localhost:8000/video"
+  src="https://railway-driver-monitor-api-612246961509.us-central1.run.app/video"
   controls
   preload="metadata"
   onClick={togglePlay}
