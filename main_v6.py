@@ -398,8 +398,7 @@ cv2.destroyAllWindows()
 import subprocess
 
 subprocess.run([
-    r"C:\Users\gujju\Downloads\ffmpeg-8.1.1-essentials_build (1)\ffmpeg-8.1.1-essentials_build\bin\ffmpeg.exe",
-    "-y",
+    "ffmpeg" ,
     "-i",
     "outputs/final_output.mp4",
     "-c:v",
