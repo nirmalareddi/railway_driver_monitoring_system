@@ -71,6 +71,13 @@ export const analysisService = {
   getTimeline: async () => {
     const events = await axiosClient.get('/events');
 
+    console.log("Events response:", events);
+
+    if (!Array.isArray(events)) {
+      console.error("Events is not an array:", events);
+      return [];
+    }
+
     return events.map((event, index) => ({
       id: index + 1,
 
