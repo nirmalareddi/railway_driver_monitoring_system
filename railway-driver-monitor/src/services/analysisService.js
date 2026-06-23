@@ -45,31 +45,54 @@ export const analysisService = {
   },
 
   getResults: async () => {
-    const report = await axiosClient.get('/report');
+  const report = await axiosClient.get('/report');
 
-    return {
-      videoId: 'latest',
-      videoUrl:
-        'https://railway-driver-monitor-api-612246961509.us-central1.run.app/video',
-      duration: '01m 53s',
-      durationSeconds: 113,
-      totalFrames: 3386,
-      fps: 30,
-      resolution: '1280x720',
+  // Report not generated yet
+  if (
+    report?.status === 'failed' ||
+    report?.message === 'Report file not found'
+  ) {
+    throw new Error('Report not ready');
+  }
 
-      totalIncidents: report.total_events || 0,
+  return {
+    videoId: 'latest',
 
-      incidentsSummary: {
-        drowsiness: report.event_summary?.drowsiness || 0,
-        attentionLoss: report.event_summary?.attention_loss || 0,
-        mobileUsage: report.event_summary?.mobile_usage || 0,
-        faceNotVisible: report.event_summary?.face_not_visible || 0
-      }
-    };
-  },
+    videoUrl:
+      'https://railway-driver-monitor-api-612246961509.us-central1.run.app/video',
+
+    duration: '01m 53s',
+    durationSeconds: 113,
+    totalFrames: 3386,
+    fps: 30,
+    resolution: '1280x720',
+
+    totalIncidents: report.total_events || 0,
+
+    incidentsSummary: {
+      drowsiness: report.event_summary?.drowsiness || 0,
+      attentionLoss: report.event_summary?.attention_loss || 0,
+      mobileUsage: report.event_summary?.mobile_usage || 0,
+      faceNotVisible: report.event_summary?.face_not_visible || 0
+    }
+  };
+},
 
   getTimeline: async () => {
-    const events = await axiosClient.get('/events');
+    const response = await axiosClient.get('/events');
+
+    if (
+  response?.status === 'failed' ||
+  response?.message === 'Events file not found'
+) {
+  throw new Error('Events not ready');
+}
+
+const events = Array.isArray(response)
+  ? response
+  : Array.isArray(response?.events)
+    ? response.events
+    : [];
 
     console.log("Events response:", events);
 
@@ -80,26 +103,18 @@ export const analysisService = {
 
     return events.map((event, index) => ({
       id: index + 1,
-
       type: event.event
         .replace(/_/g, ' ')
         .replace(/\b\w/g, c => c.toUpperCase()),
-
       timestamp: Math.floor(event.timestamp),
-
-      timeString:
-        `${Math.floor(event.timestamp / 60)
-          .toString()
-          .padStart(2, '0')}:${Math.floor(event.timestamp % 60)
-          .toString()
-          .padStart(2, '0')}`,
-
+      timeString: `${Math.floor(event.timestamp / 60)
+        .toString()
+        .padStart(2, '0')}:${Math.floor(event.timestamp % 60)
+        .toString()
+        .padStart(2, '0')}`,
       severity: 'Medium',
-
       thumbnail: null,
-
-      description:
-        `${event.event} detected at ${event.timestamp}s`
+      description: `${event.event} detected at ${event.timestamp}s`
     }));
   }
 };

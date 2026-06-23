@@ -13,15 +13,24 @@ export const useAnalysisStore = create((set, get) => ({
   error: null,
 
   startPollingProcessing: (videoId, onComplete) => {
-    // Clear any existing poll
     if (pollingInterval) clearInterval(pollingInterval);
-    set({ processingPercent: 0, processingStatus: null, error: null });
+
+    set({
+      processingPercent: 0,
+      processingStatus: null,
+      error: null
+    });
 
     const poll = async () => {
       try {
         const { processingPercent } = get();
-        const status = await analysisService.getProcessingStatus(videoId, processingPercent);
-        
+
+        const status =
+          await analysisService.getProcessingStatus(
+            videoId,
+            processingPercent
+          );
+
         set({
           processingStatus: status,
           processingPercent: status.percentage
@@ -32,10 +41,48 @@ export const useAnalysisStore = create((set, get) => ({
             clearInterval(pollingInterval);
             pollingInterval = null;
           }
-          if (onComplete) onComplete();
+
+          const waitForResults = async () => {
+            try {
+              console.log(
+                'Checking whether report is ready...'
+              );
+
+              const results =
+                await analysisService.getResults(videoId);
+
+              if (
+                results &&
+                typeof results.totalIncidents !== 'undefined'
+              ) {
+                console.log(
+                  'Results ready. Navigating to results page.'
+                );
+
+                if (onComplete) {
+                  onComplete();
+                }
+
+                return;
+              }
+            } catch (e) {
+              console.log(
+                'Waiting for report generation...'
+              );
+            }
+
+            setTimeout(waitForResults, 5000);
+          };
+
+          waitForResults();
         }
       } catch (err) {
-        set({ error: err.message || 'Error occurred during analysis processing.' });
+        set({
+          error:
+            err.message ||
+            'Error occurred during analysis processing.'
+        });
+
         if (pollingInterval) {
           clearInterval(pollingInterval);
           pollingInterval = null;
@@ -43,7 +90,6 @@ export const useAnalysisStore = create((set, get) => ({
       }
     };
 
-    // Run first call instantly
     poll();
     pollingInterval = setInterval(poll, 2000);
   },
@@ -56,22 +102,50 @@ export const useAnalysisStore = create((set, get) => ({
   },
 
   fetchResults: async (videoId) => {
-    set({ loadingResults: true, error: null });
+    set({
+      loadingResults: true,
+      error: null
+    });
+
     try {
-      const results = await analysisService.getResults(videoId);
-      set({ results, loadingResults: false });
+      const results =
+        await analysisService.getResults(videoId);
+
+      set({
+        results,
+        loadingResults: false
+      });
     } catch (err) {
-      set({ error: err.message || 'Failed to fetch analysis results', loadingResults: false });
+      set({
+        error:
+          err.message ||
+          'Failed to fetch analysis results',
+        loadingResults: false
+      });
     }
   },
 
   fetchTimeline: async (videoId) => {
-    set({ loadingTimeline: true, error: null });
+    set({
+      loadingTimeline: true,
+      error: null
+    });
+
     try {
-      const timeline = await analysisService.getTimeline(videoId);
-      set({ timeline, loadingTimeline: false });
+      const timeline =
+        await analysisService.getTimeline(videoId);
+
+      set({
+        timeline,
+        loadingTimeline: false
+      });
     } catch (err) {
-      set({ error: err.message || 'Failed to fetch incident timeline', loadingTimeline: false });
+      set({
+        error:
+          err.message ||
+          'Failed to fetch incident timeline',
+        loadingTimeline: false
+      });
     }
   },
 
@@ -80,6 +154,7 @@ export const useAnalysisStore = create((set, get) => ({
       clearInterval(pollingInterval);
       pollingInterval = null;
     }
+
     set({
       processingStatus: null,
       processingPercent: 0,
