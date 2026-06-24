@@ -192,7 +192,8 @@ def get_video(job_id: str):
     video_path = os.path.join(
         "outputs",
         job_id,
-        "final_output.mp4"
+        "final_output_browser.mp4"
+    
     )
 
     if not os.path.exists(video_path):
@@ -218,7 +219,7 @@ def get_status(job_id: str):
     )
 
     video_exists = os.path.exists(
-        os.path.join("outputs", job_id, "final_output.mp4")
+        os.path.join("outputs", job_id, "final_output_browser.mp4")
     )
 
     if report_exists and events_exists and video_exists:

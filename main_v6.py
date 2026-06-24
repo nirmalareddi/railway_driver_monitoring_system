@@ -150,8 +150,15 @@ model = YOLO("yolov8n.pt")
 # ==================================
 
 cap = cv2.VideoCapture(VIDEO_PATH)
+if not cap.isOpened():
+    raise Exception(
+        f"Cannot open video: {VIDEO_PATH}"
+    )
 
 fps = cap.get(cv2.CAP_PROP_FPS)
+
+if fps <= 0:
+    fps = 30
 
 width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
 height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
@@ -159,6 +166,16 @@ height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 fourcc = cv2.VideoWriter_fourcc(*'mp4v')
 
 out = cv2.VideoWriter(OUTPUT_VIDEO, fourcc, fps, (width, height))
+
+print("VIDEO_PATH:", VIDEO_PATH)
+print("OUTPUT_VIDEO:", OUTPUT_VIDEO)
+
+print("FPS:", fps)
+print("WIDTH:", width)
+print("HEIGHT:", height)
+
+print("CAP OPENED:", cap.isOpened())
+print("VIDEO WRITER OPENED:", out.isOpened())
 
 frame_number = 0
 
@@ -418,18 +435,22 @@ with mp_face_mesh.FaceMesh(
 cap.release()
 out.release()
 cv2.destroyAllWindows()
-import subprocess
+
+BROWSER_VIDEO = os.path.join(
+    OUTPUT_FOLDER,
+    "final_output_browser.mp4"
+)
 
 result = subprocess.run(
     [
         "ffmpeg",
         "-i",
-        "outputs/final_output.mp4",
+        OUTPUT_VIDEO,
         "-c:v",
         "libx264",
         "-pix_fmt",
         "yuv420p",
-        "outputs/final_output_browser.mp4"
+        BROWSER_VIDEO
     ],
     capture_output=True,
     text=True
@@ -466,5 +487,5 @@ with open(REPORT_FILE, "w") as f:
 print(f"[DONE] Report saved to {REPORT_FILE}")
 print(f"[DONE] Video saved to {OUTPUT_VIDEO}")
 
-print("final_output.mp4 exists:", os.path.exists("outputs/final_output.mp4"))
-print("final_output_browser.mp4 exists:", os.path.exists("outputs/final_output_browser.mp4"))
+print("final_output.mp4 exists:", os.path.exists(OUTPUT_VIDEO))
+print("final_output_browser.mp4 exists:", os.path.exists(BROWSER_VIDEO))
