@@ -28,20 +28,25 @@ export const uploadService = {
 
       console.log('Upload Success:', uploadResponse);
 
-      // Start analysis in background
-      axiosClient.post(API.ANALYZE)
-        .then((res) => {
-          console.log('Analysis Started:', res);
-        })
-        .catch((err) => {
-          console.error('Analysis Error:', err);
-        });
+const jobId = uploadResponse.job_id;
 
-      return {
-        videoId: 'latest',
-        fileName: file.name,
-        status: 'Processing'
-      };
+console.log('Job ID:', jobId);
+
+// Start analysis for this specific job
+axiosClient.post(`${API.ANALYZE}/${jobId}`)
+  .then((res) => {
+    console.log('Analysis Started:', res);
+  })
+  .catch((err) => {
+    console.error('Analysis Error:', err);
+  });
+
+return {
+  videoId: jobId,
+  jobId,
+  fileName: file.name,
+  status: 'Processing'
+};
 
     } catch (error) {
       console.error('UPLOAD ERROR:', error);

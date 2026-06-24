@@ -42,39 +42,38 @@ export const useAnalysisStore = create((set, get) => ({
             pollingInterval = null;
           }
 
-          const waitForResults = async () => {
-            try {
-              console.log(
-                'Checking whether report is ready...'
-              );
+          const waitForCompletion = async () => {
+  try {
+    const status =
+      await analysisService.getStatus(videoId);
 
-              const results =
-                await analysisService.getResults(videoId);
+    console.log(
+      'Current Job Status:',
+      status.status
+    );
 
-              if (
-                results &&
-                typeof results.totalIncidents !== 'undefined'
-              ) {
-                console.log(
-                  'Results ready. Navigating to results page.'
-                );
+    if (status.status === 'completed') {
 
-                if (onComplete) {
-                  onComplete();
-                }
+      console.log(
+        'Analysis completed.'
+      );
 
-                return;
-              }
-            } catch (e) {
-              console.log(
-                'Waiting for report generation...'
-              );
-            }
+      if (onComplete) {
+        onComplete();
+      }
 
-            setTimeout(waitForResults, 5000);
-          };
+      return;
+    }
+  } catch (e) {
+    console.log(
+      'Waiting for analysis completion...'
+    );
+  }
 
-          waitForResults();
+  setTimeout(waitForCompletion, 5000);
+};
+
+waitForCompletion();
         }
       } catch (err) {
         set({
@@ -113,7 +112,8 @@ export const useAnalysisStore = create((set, get) => ({
 
       set({
         results,
-        loadingResults: false
+        loadingResults: false,
+        error: null
       });
     } catch (err) {
       set({
@@ -126,29 +126,29 @@ export const useAnalysisStore = create((set, get) => ({
   },
 
   fetchTimeline: async (videoId) => {
+  set({
+    loadingTimeline: true,
+    error: null
+  });
+
+  try {
+    const timeline =
+      await analysisService.getTimeline(videoId);
+
     set({
-      loadingTimeline: true,
+      timeline,
+      loadingTimeline: false,
       error: null
     });
-
-    try {
-      const timeline =
-        await analysisService.getTimeline(videoId);
-
-      set({
-        timeline,
-        loadingTimeline: false
-      });
-    } catch (err) {
-      set({
-        error:
-          err.message ||
-          'Failed to fetch incident timeline',
-        loadingTimeline: false
-      });
-    }
-  },
-
+  } catch (err) {
+    set({
+      error:
+        err.message ||
+        'Failed to fetch incident timeline',
+      loadingTimeline: false
+    });
+  }
+},
   resetStore: () => {
     if (pollingInterval) {
       clearInterval(pollingInterval);

@@ -44,8 +44,14 @@ export const analysisService = {
     };
   },
 
-  getResults: async () => {
-  const report = await axiosClient.get('/report');
+  getStatus: async (jobId) => {
+    return await axiosClient.get(`/status/${jobId}`);
+  },
+
+  getResults: async (jobId) => {
+  const report = await axiosClient.get(
+    `${API.REPORT}/${jobId}`
+  );
 
   // Report not generated yet
   if (
@@ -56,10 +62,10 @@ export const analysisService = {
   }
 
   return {
-    videoId: 'latest',
+    videoId: jobId,
 
     videoUrl:
-      'https://railway-driver-monitor-api-612246961509.us-central1.run.app/video',
+  `https://railway-driver-monitor-api-612246961509.us-central1.run.app/video/${jobId}`,
 
     duration: '01m 53s',
     durationSeconds: 113,
@@ -78,8 +84,10 @@ export const analysisService = {
   };
 },
 
-  getTimeline: async () => {
-    const response = await axiosClient.get('/events');
+  getTimeline: async (jobId) => {
+  const response = await axiosClient.get(
+    `${API.EVENTS}/${jobId}`
+  );
 
     if (
   response?.status === 'failed' ||
@@ -96,10 +104,7 @@ const events = Array.isArray(response)
 
     console.log("Events response:", events);
 
-    if (!Array.isArray(events)) {
-      console.error("Events is not an array:", events);
-      return [];
-    }
+    
 
     return events.map((event, index) => ({
       id: index + 1,

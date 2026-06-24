@@ -7,7 +7,16 @@ import { useAnalysisStore } from '../../store/analysisStore';
 export const Processing = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const videoId = searchParams.get('videoId') || 'mock-vid-123';
+  const videoId = searchParams.get('videoId');
+
+if (!videoId) {
+  return (
+    <ErrorState
+      message="No Job ID found."
+      onRetry={() => navigate('/')}
+    />
+  );
+}
 
   const { 
     processingStatus, 

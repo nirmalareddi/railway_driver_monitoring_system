@@ -23,9 +23,10 @@ export const useUploadStore = create((set) => ({
         set({ progress });
       });
       set({ uploading: false, result: response });
-
 if (navigate) {
-  navigate('/processing');
+  navigate(
+    `/processing?videoId=${response.videoId}`
+  );
 }
     } catch (err) {
       set({ uploading: false, error: err.message || 'Video upload failed.' });
