@@ -12,17 +12,40 @@ from scipy.spatial import distance
 
 import sys
 
-if len(sys.argv) > 1:
+if len(sys.argv) > 2:
 
     VIDEO_PATH = sys.argv[1]
+    JOB_ID = sys.argv[2]
 
 else:
 
     VIDEO_PATH = "videos/scripted_driver.mp4"
+    JOB_ID = "default"
 
-OUTPUT_VIDEO = "outputs/final_output.mp4"
-EVENT_FILE = "outputs/events.json"
-REPORT_FILE = "outputs/report.json"
+OUTPUT_FOLDER = os.path.join(
+    "outputs",
+    JOB_ID
+)
+
+os.makedirs(
+    OUTPUT_FOLDER,
+    exist_ok=True
+)
+
+OUTPUT_VIDEO = os.path.join(
+    OUTPUT_FOLDER,
+    "final_output.mp4"
+)
+
+EVENT_FILE = os.path.join(
+    OUTPUT_FOLDER,
+    "events.json"
+)
+
+REPORT_FILE = os.path.join(
+    OUTPUT_FOLDER,
+    "report.json"
+)
 
 EAR_THRESHOLD = 0.15
 DROWSINESS_TIME_THRESHOLD = 3.0
@@ -397,16 +420,23 @@ out.release()
 cv2.destroyAllWindows()
 import subprocess
 
-subprocess.run([
-    "ffmpeg" ,
-    "-i",
-    "outputs/final_output.mp4",
-    "-c:v",
-    "libx264",
-    "-pix_fmt",
-    "yuv420p",
-    "outputs/final_output_browser.mp4"
-])
+result = subprocess.run(
+    [
+        "ffmpeg",
+        "-i",
+        "outputs/final_output.mp4",
+        "-c:v",
+        "libx264",
+        "-pix_fmt",
+        "yuv420p",
+        "outputs/final_output_browser.mp4"
+    ],
+    capture_output=True,
+    text=True
+)
+
+print("FFMPEG RETURN CODE:", result.returncode)
+print("FFMPEG STDERR:", result.stderr[-1000:])
 # ==================================
 # SAVE EVENTS
 # ==================================
@@ -435,3 +465,6 @@ with open(REPORT_FILE, "w") as f:
 
 print(f"[DONE] Report saved to {REPORT_FILE}")
 print(f"[DONE] Video saved to {OUTPUT_VIDEO}")
+
+print("final_output.mp4 exists:", os.path.exists("outputs/final_output.mp4"))
+print("final_output_browser.mp4 exists:", os.path.exists("outputs/final_output_browser.mp4"))

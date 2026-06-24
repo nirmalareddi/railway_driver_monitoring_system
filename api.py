@@ -4,6 +4,7 @@ import os
 import subprocess
 import sys
 import json
+import uuid
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI(
@@ -48,17 +49,18 @@ def home():
 # ==================================
 # UPLOAD VIDEO
 # ==================================
-
 @app.post("/upload-video")
 async def upload_video(
     file: UploadFile = File(...)
 ):
 
-    global CURRENT_VIDEO
+    job_id = str(uuid.uuid4())
+
+    file_extension = os.path.splitext(file.filename)[1]
 
     file_path = os.path.join(
         UPLOAD_FOLDER,
-        file.filename
+        f"{job_id}{file_extension}"
     )
 
     with open(
@@ -71,11 +73,10 @@ async def upload_video(
             buffer
         )
 
-    CURRENT_VIDEO = file_path
-
     return {
         "status": "success",
         "message": "Video uploaded successfully",
+        "job_id": job_id,
         "filename": file.filename
     }
 
@@ -83,17 +84,24 @@ async def upload_video(
 # ANALYZE VIDEO
 # ==================================
 
-@app.post("/analyze")
-def analyze_video():
+@app.post("/analyze/{job_id}")
+def analyze_video(job_id: str):
 
-    global CURRENT_VIDEO
+    video_files = [
+        f for f in os.listdir(UPLOAD_FOLDER)
+        if f.startswith(job_id)
+    ]
 
-    if CURRENT_VIDEO is None:
-
+    if not video_files:
         return {
             "status": "failed",
-            "message": "No video uploaded"
+            "message": "Video not found"
         }
+
+    video_path = os.path.join(
+        UPLOAD_FOLDER,
+        video_files[0]
+    )
 
     try:
 
@@ -101,7 +109,8 @@ def analyze_video():
             [
                 sys.executable,
                 "main_v6.py",
-                CURRENT_VIDEO
+                video_path,
+                job_id
             ],
             capture_output=True,
             text=True
@@ -131,10 +140,15 @@ def health_check():
     return {
         "status": "healthy"
     }
-@app.get("/events")
-def get_events():
+#events endpoint    
+@app.get("/events/{job_id}")
+def get_events(job_id: str):
 
-    events_path = "outputs/events.json"
+    events_path = os.path.join(
+        "outputs",
+        job_id,
+        "events.json"
+    )
 
     if not os.path.exists(events_path):
 
@@ -148,10 +162,15 @@ def get_events():
         events = json.load(f)
 
     return events
-@app.get("/report")
-def get_report():
+#report endpoint
+@app.get("/report/{job_id}")
+def get_report(job_id: str):
 
-    report_path = "outputs/report.json"
+    report_path = os.path.join(
+        "outputs",
+        job_id,
+        "report.json"
+    )
 
     if not os.path.exists(report_path):
 
@@ -164,11 +183,17 @@ def get_report():
 
         report = json.load(f)
 
-    return report    
-@app.get("/video")
-def get_video():
+    return report 
 
-    video_path = "outputs/final_output_browser.mp4"
+##video endpoint
+@app.get("/video/{job_id}")
+def get_video(job_id: str):
+
+    video_path = os.path.join(
+        "outputs",
+        job_id,
+        "final_output.mp4"
+    )
 
     if not os.path.exists(video_path):
 
@@ -181,3 +206,22 @@ def get_video():
         video_path,
         media_type="video/mp4"
     )
+@app.get("/status/{job_id}")
+def get_status(job_id: str):
+
+    report_exists = os.path.exists(
+        os.path.join("outputs", job_id, "report.json")
+    )
+
+    events_exists = os.path.exists(
+        os.path.join("outputs", job_id, "events.json")
+    )
+
+    video_exists = os.path.exists(
+        os.path.join("outputs", job_id, "final_output.mp4")
+    )
+
+    if report_exists and events_exists and video_exists:
+        return {"status": "completed"}
+
+    return {"status": "processing"}    
