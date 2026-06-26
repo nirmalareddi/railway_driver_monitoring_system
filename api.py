@@ -222,7 +222,9 @@ def get_status(job_id: str):
         os.path.join("outputs", job_id, "final_output_browser.mp4")
     )
 
-    if report_exists and events_exists and video_exists:
-        return {"status": "completed"}
-
-    return {"status": "processing"}    
+    return {
+    "status": "completed" if report_exists and events_exists and video_exists else "processing",
+    "report_exists": report_exists,
+    "events_exists": events_exists,
+    "video_exists": video_exists
+}  

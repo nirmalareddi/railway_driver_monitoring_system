@@ -487,5 +487,8 @@ with open(REPORT_FILE, "w") as f:
 print(f"[DONE] Report saved to {REPORT_FILE}")
 print(f"[DONE] Video saved to {OUTPUT_VIDEO}")
 
+print("REPORT EXISTS:", os.path.exists(REPORT_FILE))
+print("EVENTS EXISTS:", os.path.exists(EVENT_FILE))
+print("VIDEO EXISTS:", os.path.exists(BROWSER_VIDEO))
 print("final_output.mp4 exists:", os.path.exists(OUTPUT_VIDEO))
 print("final_output_browser.mp4 exists:", os.path.exists(BROWSER_VIDEO))
