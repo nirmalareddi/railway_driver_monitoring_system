@@ -95,7 +95,7 @@ export const VideoPlayer = ({ videoUrl, timeline = [], activeIncident, onTimeUpd
     const seconds = Math.floor(timeInSeconds % 60);
     return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
   };
-
+console.log("Video URL received:", videoUrl);
   return (
     <div 
       className="glass-card" 
@@ -175,7 +175,7 @@ export const VideoPlayer = ({ videoUrl, timeline = [], activeIncident, onTimeUpd
 
 <video
   ref={videoRef}
-  src="https://railway-driver-monitor-api-612246961509.us-central1.run.app/video"
+  src={videoUrl}
   controls
   preload="metadata"
   onClick={togglePlay}
