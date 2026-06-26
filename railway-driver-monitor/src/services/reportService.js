@@ -69,28 +69,48 @@ export const reportService = {
 
   downloadReport: async (videoId, format) => {
     try {
-      return await axiosClient.get(
-  API.VIDEO,
-  { responseType: 'blob' }
-);
+      const response = await axiosClient.get(
+        `/report/pdf/${videoId}`,
+        {
+          responseType: 'blob'
+        }
+      );
+
+      const url = window.URL.createObjectURL(response);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `report_${videoId}.pdf`;
+
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+
+      return { success: true };
     } catch (error) {
+      console.error('PDF download failed:', error);
       console.log(`Simulating download for report ${videoId} in ${format} format`);
+
       await new Promise((resolve) => setTimeout(resolve, 500));
-      
+
       let fileContent = '';
       let mimeType = 'application/json';
       let fileName = `report_${videoId}.${format}`;
 
       if (format.includes('json')) {
-        fileContent = JSON.stringify({
-          videoId,
-          timestamp: new Date().toISOString(),
-          status: 'Completed',
-          incidents: [
-            { type: 'Drowsiness', timestamp: '00:12', severity: 'High', description: 'Eyelids closed for 3.8s' },
-            { type: 'Attention Loss', timestamp: '00:32', severity: 'Medium', description: 'Gaze diverted' }
-          ]
-        }, null, 2);
+        fileContent = JSON.stringify(
+          {
+            videoId,
+            timestamp: new Date().toISOString(),
+            status: 'Completed',
+            incidents: [
+              { type: 'Drowsiness', timestamp: '00:12', severity: 'High', description: 'Eyelids closed for 3.8s' },
+              { type: 'Attention Loss', timestamp: '00:32', severity: 'Medium', description: 'Gaze diverted' }
+            ]
+          },
+          null,
+          2
+        );
         mimeType = 'application/json';
       } else if (format === 'csv') {
         fileContent = 'IncidentID,IncidentType,Timestamp,Severity,Details\n1,Drowsiness,00:12,High,Eyes closed for 3.8 seconds\n2,Attention Loss,00:32,Medium,Gaze diverted';
@@ -101,15 +121,15 @@ export const reportService = {
       }
 
       const blob = new Blob([fileContent], { type: mimeType });
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', fileName);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
-      
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const downloadLink = document.createElement('a');
+      downloadLink.href = downloadUrl;
+      downloadLink.setAttribute('download', fileName);
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      downloadLink.remove();
+      window.URL.revokeObjectURL(downloadUrl);
+
       return { success: true };
     }
   },

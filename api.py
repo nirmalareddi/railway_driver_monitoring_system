@@ -7,6 +7,17 @@ import json
 import uuid
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
+from io import BytesIO
+from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.platypus import (
+    SimpleDocTemplate,
+    Paragraph,
+    Spacer,
+    Table,
+    TableStyle
+)
+from fastapi.responses import StreamingResponse
 app = FastAPI(
     title="Railway Driver Monitoring API",
     version="1.0"
@@ -183,7 +194,110 @@ def get_report(job_id: str):
 
         report = json.load(f)
 
-    return report 
+    return report
+
+
+@app.get("/report/pdf/{job_id}")
+def download_pdf_report(job_id: str):
+
+    report_path = os.path.join(
+        "outputs",
+        job_id,
+        "report.json"
+    )
+
+    if not os.path.exists(report_path):
+        return {
+            "status": "failed",
+            "message": "Report file not found"
+        }
+
+    with open(report_path, "r") as f:
+        report = json.load(f)
+
+    buffer = BytesIO()
+
+    doc = SimpleDocTemplate(buffer)
+
+    styles = getSampleStyleSheet()
+
+    elements = []
+
+    elements.append(
+        Paragraph(
+            "Railway Driver Monitoring Report",
+            styles["Title"]
+        )
+    )
+
+    elements.append(Spacer(1, 20))
+
+    elements.append(
+        Paragraph(
+            f"<b>Job ID:</b> {job_id}",
+            styles["Normal"]
+        )
+    )
+
+    elements.append(
+        Paragraph(
+            f"<b>Total Events:</b> {report['total_events']}",
+            styles["Normal"]
+        )
+    )
+
+    elements.append(Spacer(1, 20))
+
+    summary_data = [
+        ["Event Type", "Count"]
+    ]
+
+    for event, count in report["event_summary"].items():
+        summary_data.append([event, str(count)])
+
+    table = Table(summary_data)
+
+    table.setStyle(
+        TableStyle([
+            ("BACKGROUND", (0,0), (-1,0), colors.grey),
+            ("TEXTCOLOR", (0,0), (-1,0), colors.whitesmoke),
+            ("GRID", (0,0), (-1,-1), 1, colors.black),
+            ("BACKGROUND", (0,1), (-1,-1), colors.beige),
+            ("BOTTOMPADDING", (0,0), (-1,0), 10)
+        ])
+    )
+
+    elements.append(table)
+
+    elements.append(Spacer(1, 20))
+
+    elements.append(
+        Paragraph(
+            "<b>Incident Timeline</b>",
+            styles["Heading2"]
+        )
+    )
+
+    for event in report["events"]:
+        elements.append(
+            Paragraph(
+                f"{event['timestamp']} sec : {event['event']}",
+                styles["Normal"]
+            )
+        )
+
+    doc.build(elements)
+
+    buffer.seek(0)
+
+    return StreamingResponse(
+        buffer,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition":
+            f"attachment; filename=report_{job_id}.pdf"
+        }
+    )   
 
 ##video endpoint
 @app.get("/video/{job_id}")
